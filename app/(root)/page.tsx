@@ -1,83 +1,91 @@
-import React from "react";
-import Header from "../components/header";
-import Image from "next/image";
-import bell from "@/public/assets/icons/bell.svg";
-import doc from "@/public/assets/images/doc.png";
-import docIcon from "@/public/assets/icons/doc.svg";
-import bin from "@/public/assets/icons/delete.svg";
-import { IoSearch } from "react-icons/io5";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
+import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getDocuments } from "../lib/actions/room.actions";
+import Header from "../components/header";
 import AddDocumentBtn from "../components/AddDocumentBtn";
+import { dateConverter } from "../lib/utils";
+import Notifications from "../components/Notification";
+import { DeleteModal } from "../components/Delete";
 
-const page = async () => {
+const Home = async () => {
   const clerkUser = await currentUser();
-  if (!clerkUser) redirect("/sign-in");
-  const documents = [];
+
+  if (!clerkUser) {
+    redirect("/sign-in");
+  }
+
+  const roomDocuments = await getDocuments(
+    clerkUser.emailAddresses[0].emailAddress
+  );
+
   return (
-    <div className="container">
-      <div className="fixed w-full">
-      <Header>
-        <div className="flex items-center">
-          <IoSearch className="mr-4 w-[16px]" />
-          <Image src={bell} alt="bell icon" className="mr-4 w-[16px]" />
+    <main className="home-container px-4">
+      <Header className="sticky left-0 top-0">
+        <div className="flex items-center gap-2 lg:gap-4">
+        <Notifications />
           <SignedIn>
             <UserButton />
           </SignedIn>
         </div>
       </Header>
-      </div>
-      {documents.length < 1 ? (
-        <div className="h-screen w-full flex flex-col items-center justify-center">
-          <Image
-            src={docIcon}
-            alt="icon for doc"
-            width={80}
-            className="bg-dim p-2 my-2 rounded-md"
-          />
-          <h3 className="text-xl my-2 mb-4">
-            You have not collaborated on any documents
-          </h3>
-          <AddDocumentBtn
-            userId={clerkUser.id}
-            email={clerkUser.emailAddresses[0].emailAddress}
-          />
-        </div>
-      ) : (
-        <div className="mt-4 max-w-[750px] mx-auto">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">All Documents</h1>
+
+      {roomDocuments.data.length > 0 ? (
+        <div className="document-list-container">
+          <div className="document-list-title">
+            <h3 className="text-28-semibold">All documents</h3>
             <AddDocumentBtn
               userId={clerkUser.id}
               email={clerkUser.emailAddresses[0].emailAddress}
             />
           </div>
-          <div className="relative mt-6">
-            <Image
-              src={doc}
-              alt="doc bg"
-              className="w-full absolute top-0 rounded max-h-[80px]"
-            />
-            <div className="flex items-center justify-between h-[77px] z-[99] p-2">
-              <div className="z-[99] flex items-center">
-                <Image
-                  src={docIcon}
-                  alt="icon for doc"
-                  className="bg-dim p-2 rounded-md"
-                />
-                <div className="ml-3">
-                  <h2 className="text-lg">Test title</h2>
-                  <p className="text-base text-dim">Created about 2mins</p>
-                </div>
-              </div>
-              <Image src={bin} alt="icon for bin" className="z-[99]" />
-            </div>
-          </div>
+          <ul className="document-ul">
+            {roomDocuments.data.map(({ id, metadata, createdAt }: any) => (
+              <li key={id} className="document-list-item">
+                <Link
+                  href={`/documents/${id}`}
+                  className="flex flex-1 items-center gap-4"
+                >
+                  <div className="hidden rounded-md bg-dark-500 p-2 sm:block">
+                    <Image
+                      src="/assets/icons/doc.svg"
+                      alt="file"
+                      width={40}
+                      height={40}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="line-clamp-1 text-lg">{metadata.title}</p>
+                    <p className="text-sm font-light text-blue-100">
+                      Created about {dateConverter(createdAt)}
+                    </p>
+                  </div>
+                </Link>
+                <DeleteModal roomId={id} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div className="document-list-empty">
+          <Image
+            src="/assets/icons/doc.svg"
+            alt="Document"
+            width={40}
+            height={40}
+            className="mx-auto"
+          />
+
+          <AddDocumentBtn
+            userId={clerkUser.id}
+            email={clerkUser.emailAddresses[0].emailAddress}
+          />
         </div>
       )}
-    </div>
+    </main>
   );
 };
 
-export default page;
+export default Home;

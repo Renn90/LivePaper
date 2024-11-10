@@ -10,7 +10,7 @@ const ActiveCollaborators = () => {
       {
         collaborators.map(({id, avatar, name, color}) => (
             <li key={id}>
-                <Image src={avatar} alt={name} width={100} height={100} style={{border: `3px solid ${color}`}} className='inline-block rounded-full ring-2 ring-dark-100'/>
+                <Image src={avatar} alt={name} width={35} height={35} style={{border: `3px solid ${color}`}} className='inline-block rounded-full ring-2 ring-dark-100'/>
             </li>
         ))
       }
