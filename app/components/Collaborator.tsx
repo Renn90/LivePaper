@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import React, { useState } from 'react'
 import UserTypeSelector from './UserTypeSelector';
 import { removeCollaborator, updateDocumentAccess } from '../lib/actions/room.actions';

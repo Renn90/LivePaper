@@ -13,7 +13,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import UserTypeSelector from "./UserTypeSelector";
 import Collaborator from "./Collaborator";
-import { updateDocument, updateDocumentAccess } from "../lib/actions/room.actions";
+import { updateDocumentAccess } from "../lib/actions/room.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
